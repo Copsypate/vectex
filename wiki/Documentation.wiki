@@ -228,7 +228,7 @@ quite amazing, being high quality, feature filled, efficient and compact.
 Also his SVG renderer was very helpful in getting this plugin done.
 http://www.antigrain.com/
 
-To the short paper "Implementing Vector-Based Texturing In RenderMan", by
+To the short paper "Implementing Vector-Based Texturing In Renderman", by
 John Haddon and Ian Stephenson, which gave me the nice hint of using a
 tile cache. http://www.dctsystems.co.uk/Text/haddon.pdf
 
