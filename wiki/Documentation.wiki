@@ -127,20 +127,20 @@ Of course there are few more details about each of the interface parameters:
   texture resolutions with different colors. The result goes more or less
   like this:
 
-  || texture size || hue color                                    ||
-  || 1x1          || pink                                         ||
-  || 2x2          || red                                          ||
-  || 4x4          || orange                                       ||
-  || 8x8          || yellow                                       ||
-  || 16x16        || yellowish green                              ||
-  || 32x32        || pure green                                   ||
-  || 64x64        || bluish green (or greenish blue?)             ||
-  || 128x128      || cyan                                         ||
-  || 256x256      || mid blue                                     ||
-  || 512x512      || pure blue                                    ||
-  || 1012x1024    || purple                                       ||
-  || 2048x2048    || magenta                                      ||
-  || 4096x4096    || pink, and then the same colors go on cycling ||
+|| *texture size* || *hue color*                                  ||
+|| 1x1            || pink                                         ||
+|| 2x2            || red                                          ||
+|| 4x4            || orange                                       ||
+|| 8x8            || yellow                                       ||
+|| 16x16          || yellowish green                              ||
+|| 32x32          || pure green                                   ||
+|| 64x64          || bluish green (or greenish blue?)             ||
+|| 128x128        || cyan                                         ||
+|| 256x256        || mid blue                                     ||
+|| 512x512        || pure blue                                    ||
+|| 1012x1024      || purple                                       ||
+|| 2048x2048      || magenta                                      ||
+|| 4096x4096      || pink, and then the same colors go on cycling ||
 
   Also try to disable MIPMAP, which then does not blend different level and make
   them more clearly distinguishable.
