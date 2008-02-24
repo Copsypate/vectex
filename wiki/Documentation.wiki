@@ -1,5 +1,3 @@
-#summary vectex usage and release notes
-
 = VECTEX 0.9 =
 
 Copyright (C) 2008 Marcelo de Gomensoro Malheiros <mgmalheiros/gmail/com>
