@@ -1,0 +1,238 @@
+#summary vectex usage and release notes
+
+= VECTEX 0.9 =
+
+Copyright (C) 2008 Marcelo de Gomensoro Malheiros <mgmalheiros/gmail/com>
+
+http://code.google.com/p/vectex/
+
+
+== ABOUT ==
+
+Vectex is a SVG vector texture plugin for Blender.
+
+Its main goal is to be a robust texture plugin for rendering text, signs and   
+any other type of vector art, without the need for an explicit conversion to
+a bitmap image. Correctly used it can both give a better quality and use less
+memory than a bitmap.
+
+It is released as Free Software by using the GPL license. The included AGG and
+EXPAT libraries are licensed separately and retain the original copyrights.
+
+
+== MAIN FEATURES ==
+
+  * SVG support for paths and basic shapes, using solid colors.
+  
+  * Makes possible to render an arbitrarily detailed texture, calculating only the needed parts of it (called tiles) in the best resolution for the final Blender output.
+  
+  * Uses the Anti-Grain Geometry (AGG) library for very fast and accurate rendering.
+  
+  * Tiles are cached and kept in memory as long as they are needed or the memory limit is reached. It is also possible to see how much memory it is using.
+  
+  * Tiles which are of solid color are stored efficiently as a single RGB, both reducing memory usage and increasing the performance.
+  
+  * Implements trilinear texturing (mipmapping and bilinear texture interpolation).
+  
+  * Can apply a color code to the texture for the identification of different detail levels.
+  
+  * It is possible to define the base color (paper color) as where the SVG illustrations is drawn onto.
+  
+  * Has a simple text entry for specifying the SVG file.
+  
+  * Multiple instances of the plugin can be run independently in parallel, with different textures and settings.
+
+
+== DOWNLOADING, COMPILING AND INSTALLING ==
+
+The source code and contributed compiled versions can be obtained from the
+project site: http://code.google.com/p/vectex/
+
+After extracting the source code, just type "make" at the top-level directory.
+It depends on having both GCC and G++ installed, plus the standard C includes and
+development libraries. After the plugin is compiled into a dynamic library (.so),
+you can run it inside Blender going to the Texture panel (F6), selection Plugin
+as the texture type and then loading the plugin. 
+
+Although only tested on Linux, it should be fairly portable to other
+operating systems, as only ANSI-C and standard C++ features are used.
+It is also fully self-contained, including in the source the needed
+libraries (AGG and EXPAT), which are then statically linked into the plugin.
+
+
+== USAGE ==
+
+The plugin usage is straight-forward: just load it, type the name of a SVG
+file and it's done!
+
+The three most important points to note are:
+
+  * Arbitrary resolution rendering only works when OSA (anti-aliasing) is enabled in Blender. If OSA is disabled then a fixed low resolution 256x256 image is used as texture output.
+  
+  * If the plugin is in error, that is, cannot open the file or there is a problem with it, the whole texture goes red.
+  
+  * If the plugin is disabled, the whole texture goes black.
+
+Of course there are few more details about each of the interface parameters:
+
+*EXTEND*
+
+  This is the only available type of texture wrapping. It cannot be changed,
+  and means UV coordinates of the [-1,1] interval will have the same color
+  as the closest border.
+
+*ENABLE*
+
+  This button is on by default, and should be used to turn off this plugin.
+  The problem is that the current Blender plugin interface does not makes
+  possible to know when the plugin will not be used anymore, so if you are
+  not going to use it anymore, you should turn it off. This releases all the
+  memory used, which otherwise would be kept allocated until Blender ends.
+
+  It can also be used when the SVG texture has been changed externally, so
+  just disabling and then enabling it again reloads the SVG drawing.
+
+*MIPMAP*
+
+  This button is enabled by default and makes possible to have the most
+  precise resolution for the vector texture, as it enables the plugin to
+  interpolate between the immediate higher and lower resolution versions
+  of the texture. That is, if the needed texture would be at 827 pixel wide,
+  it is interpolated from the 1024 and 512 versions. In fact, it works
+  exactly as the same parameter for normal bitmap textures.
+
+  Using this option increases the memory usage at most by 50%, and reduces
+  only slightly the performance. It may be disabled for static scenes (thus
+  using only the higher resolution texture, but it should be used for
+  animated scenes to prevent "jumps" on the texture detail.
+
+*INTERPOL*
+
+  This button is also enabled by default, and works exactly as in the bitmap
+  texture. That is, it generates intermediate pixel values by bilinear
+  interpolating the 4 nearest neighboring pixels. Should be left on as it
+  has strong effect on the texture quality.
+
+*TEX LEVEL*
+
+  It is disabled by default, and is mostly useful as an aid in debugging the
+  the plugin. But it was made available because sometimes it could be
+  interesting to know the best bitmap texture size for each element of the
+  scene.
+
+  When it is pressed, the vector texture color is multiplied by a pure hue
+  color, representing the different levels of texture detail. For the more  
+  technically inclined, to each power of two is assigned a 30 degree increase
+  in the hue component of the HSV color model, thus grading the different
+  texture resolutions with different colors. The result goes more or less
+  like this:
+
+  || texture size || hue color                                    ||
+  || 1x1          || pink                                         ||
+  || 2x2          || red                                          ||
+  || 4x4          || orange                                       ||
+  || 8x8          || yellow                                       ||
+  || 16x16        || yellowish green                              ||
+  || 32x32        || pure green                                   ||
+  || 64x64        || bluish green (or greenish blue?)             ||
+  || 128x128      || cyan                                         ||
+  || 256x256      || mid blue                                     ||
+  || 512x512      || pure blue                                    ||
+  || 1012x1024    || purple                                       ||
+  || 2048x2048    || magenta                                      ||
+  || 4096x4096    || pink, and then the same colors go on cycling ||
+
+  Also try to disable MIPMAP, which then does not blend different level and make
+  them more clearly distinguishable.
+
+*MEM MAX and MEM*
+
+  The MEM MAX input places an upper limit in the memory usage for the plugin,
+  the default value being 20 Mb. If this value is placed at 0, then there
+  will be no limit, and the plugin will use as much memory as it needs.
+
+  The MEM field always shows the memory usage of the plugin, also in 
+  megabytes. Although the entry could be altered, it always reverts to the
+  current memory value.
+
+  Some care is suggested when altering the memory limit, because if setting
+  too low (like 1 or 2 Mb), most of the rendering time will be consumed by
+  generating texture details that will be soon disposed because the limit
+  has been reached. Those details could be needed right after, causing again
+  the recreation of them. So only in very strict memory constraints the   
+  limit should be set below 10 Mb.
+
+  The other side is having no limits. If you have plenty of memory, that's   
+  the fastest alternative, as all needed details will be in memory and can be
+  used as soon as needed in any animation frame. However, for a simple zoom
+  into a picture, as the tiger example, as much as 50 Mb could be quickly
+  allocated.
+
+  One tip is to run once the animation without memory limit, and then note
+  the usage after it is finished, which is the ideal one. Then you can set
+  the max limit accordingly, noting that any value below will make rendered
+  tiles be disposed, which will cause them to be rendered again if needed,
+  thus taking some extra time. As a rule of thumb, each megabyte enables the
+  storage of five 256x256 tiles.
+
+*BASE COLOR*
+
+  This is simply the color used for the background of the SVG drawing, 
+  defaulting to black.
+
+  If the color is changed then the tile cache is cleaned, because it could
+  affect their appearance. So they will rendered again as needed.
+
+*FILE NAME*
+
+  This is the entry for inputting the SVG file name and path. Because of
+  limitations on the Blender plugin interface, at most 63 characters can
+  be used. 
+
+  If there is any problem loading the file, or if the entry is simply empty,
+  the plugin will show a solid red color and no other parameters will
+  function.
+
+
+== NOTES ==
+
+  * The SVG parsing and rendering code is the sample SVG code that is part of AGG, and it only has minimal support for the standard. In fact, it does not support most of the more complex features of SVG, like text, gradients, patterns, filters or animation.
+  
+    However, if text is converted to curves, it can be drawn as any other
+    stroked or filled path.
+  
+  * There is still no support for the width and height attributes of SVG that define the canvas size. The bounding box for the path points is used to fit the drawing inside the texture, centered. Note that the bounding box takes into account the Bézier polygons (the "handles" inside a illustration program), not the curves themselves. So a drawing may not touch exactly all the texture borders.
+  
+  * The texture output has been made to be almost perfectly aligned to the internal Blender image texture, so it can be used as a drop-in replacement. However there a few limitations quality-wise:
+  
+    * Vectex uses a simple trilinear approach, that sometimes gives poorer results than the area filter from Blender, mostly when the texture surface is nearly perpendicular to the camera.
+  
+    * AGG does not have good results in very low resolution images, like 16x16 or below. In the future the idea is to create those low resolution images using traditional averaging from a higher resolution source.
+  
+  * There is still no support for alpha in the vector texture.
+  
+  * The only UV coordinate clipping mode supported is Extend, which works exactly as the same texture option in Blender.
+  
+  * Internally the generated tiles are of size 257x257, being in fact a 256x256 image plus a 1-pixel extra border at the right and bottom sides. This extra border overlaps with the neighbor tiles, and is used to support bilinear interpolation of any pixel inside the tile. 
+  
+  * Because of the limitations of the current C plugin interface from Blender, the Enable button should be disabled to free the memory in use, otherwise that memory will be left allocated and unused until Blender finishes.
+  
+  * The text entry in the plugin interface is quite hackish, but works fine, even with saving and loading the scene, as the other parameters. It needs to be the last interface element, though. Note that the entry is limited to 63 characters and the file name and path should be typed directly.
+
+
+== THANKS ==
+
+To the Blender Foundation and all the programmers and artists that are helping  
+to create such amazing tool.
+
+To Maxim Shemanarev, author of the Anti-Grain Geometry library, which is
+quite amazing, being high quality, feature filled, efficient and compact.
+Also his SVG renderer was very helpful in getting this plugin done.
+http://www.antigrain.com/
+
+To the short paper "Implementing Vector-Based Texturing In RenderMan", by
+John Haddon and Ian Stephenson, which gave me the nice hint of using a
+tile cache. http://www.dctsystems.co.uk/Text/haddon.pdf
+
+And specially to my wife Maria and our upcoming son Pedro, for letting me toy
+around this little project in my summer vacations!
